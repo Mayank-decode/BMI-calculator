@@ -2,10 +2,14 @@ import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
 import mongoose from 'mongoose';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import BmiRecord from './models/BmiRecord.js';
 
 const app = express();
 const port = process.env.PORT || 5000;
+const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
+const clientBuildDirectory = path.join(currentDirectory, '../client/dist');
 
 app.use(cors());
 app.use(express.json());
@@ -41,6 +45,13 @@ app.post('/api/bmi', async (req, res) => {
   const record = await BmiRecord.create({ name: name || 'Guest', height: heightValue, weight: weightValue, bmi, category: getCategory(bmi) });
   res.status(201).json(record);
 });
+
+// In production, Express serves the compiled React application and its API
+// from the same public URL.
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(clientBuildDirectory));
+  app.get('*', (_req, res) => res.sendFile(path.join(clientBuildDirectory, 'index.html')));
+}
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => app.listen(port, () => console.log(`API running at http://localhost:${port}`)))
