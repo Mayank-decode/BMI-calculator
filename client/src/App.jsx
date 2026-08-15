@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const API_URL = 'https://bmi-calculator-api-9jcn.onrender.com/api/bmi';
+const API_URL = '/api/bmi';
 
 function App() {
   const [form, setForm] = useState({ name: '', height: '', weight: '' });
